@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  requests  PrintRequest[]
+  createdAt DateTime       @default(now())
+}
+
+model PrintRequest {
+  id            String       @id @default(cuid())
+  user          User         @relation(fields: [userId], references: [id])
+  userId        String
+  fileUrl       String
+  plasticType   PlasticType  @relation(fields: [plasticTypeId], references: [id])
+  plasticTypeId String
+  color         Color        @relation(fields: [colorId], references: [id])
+  colorId       String
+  createdAt     DateTime     @default(now())
+}
+
+model PlasticType {
+  id        String                  @id @default(cuid())
+  name      String                  @unique
+  requests  PrintRequest[]
+  availableColors PlasticColorAvailability[]
+}
+
+model Color {
+  id        String                  @id @default(cuid())
+  name      String                  @unique
+  hex       String?
+  requests  PrintRequest[]
+  compatiblePlastics PlasticColorAvailability[]
+}
+
+model PlasticColorAvailability {
+  id            String       @id @default(cuid())
+  plasticType   PlasticType  @relation(fields: [plasticTypeId], references: [id])
+  plasticTypeId String
+  color         Color        @relation(fields: [colorId], references: [id])
+  colorId       String
+  inStock       Boolean      @default(true)
+
+  @@unique([plasticTypeId, colorId])
+}
+
+
