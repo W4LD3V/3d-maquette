@@ -1,6 +1,24 @@
 import { PrismaClient } from '@prisma/client';
+import type { NextApiRequest, NextApiResponse } from 'next';
+import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 
 const prisma = new PrismaClient();
+
+
+function getUserIdFromHeader(req: NextApiRequest): string | null {
+  const auth = req.headers.authorization || '';
+  const token = auth.replace('Bearer ', '');
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    return decoded.userId as string;
+  } catch {
+    return null;
+  }
+}
 
 export const resolvers = {
   Query: {
@@ -44,26 +62,24 @@ export const resolvers = {
   Mutation: {
     submitPrintRequest: async (
       _: any,
-      args: { fileUrl: string; plasticTypeId: string; colorId: string }
+      args: { fileUrl: string; plasticTypeId: string; colorId: string },
+      context: { req: NextApiRequest }
     ) => {
-      const user = await prisma.user.findFirst({
-        where: { email: 'test@maquette.dev' },
-      });
-  
-      if (!user) throw new Error('Seed user not found');
-  
+      const userId = getUserIdFromHeader(context.req);
+      if (!userId) throw new Error("Unauthorized");
+    
       return prisma.printRequest.create({
         data: {
           fileUrl: args.fileUrl,
           plasticTypeId: args.plasticTypeId,
           colorId: args.colorId,
-          userId: user.id,
+          userId,
         },
         include: {
           plasticType: true,
           color: true,
         },
       });
-    },
+    }    
   },  
 };
