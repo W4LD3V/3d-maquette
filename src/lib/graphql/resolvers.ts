@@ -7,10 +7,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 
 const prisma = new PrismaClient();
 
-
-function getUserIdFromHeader(req: NextApiRequest): string | null {
-  const auth = req.headers.authorization || '';
-  const token = auth.replace('Bearer ', '');
+function getUserIdFromHeader(req: Request): string | null {
+  const authHeader = req.headers.get('authorization') || '';
+  const token = authHeader.replace('Bearer ', '');
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
@@ -23,21 +22,21 @@ function getUserIdFromHeader(req: NextApiRequest): string | null {
 export const resolvers = {
   Query: {
     getPlasticTypes: async () => {
-        const types = await prisma.plasticType.findMany({
-          include: {
-            availableColors: {
-              include: {
-                color: true,
-              },
+      const types = await prisma.plasticType.findMany({
+        include: {
+          availableColors: {
+            include: {
+              color: true,
             },
           },
-        });
-      
-        return types.map((t) => ({
-          ...t,
-          colors: t.availableColors,
-        }));
-      },
+        },
+      });
+
+      return types.map((t) => ({
+        ...t,
+        colors: t.availableColors,
+      }));
+    },
 
     getColorsForPlastic: async (_: any, args: { plasticTypeId: string }) => {
       return prisma.plasticColorAvailability.findMany({
@@ -63,11 +62,11 @@ export const resolvers = {
     submitPrintRequest: async (
       _: any,
       args: { fileUrl: string; plasticTypeId: string; colorId: string },
-      context: { req: NextApiRequest }
+      context: { req: Request }
     ) => {
       const userId = getUserIdFromHeader(context.req);
-      if (!userId) throw new Error("Unauthorized");
-    
+      if (!userId) throw new Error('Unauthorized');
+
       return prisma.printRequest.create({
         data: {
           fileUrl: args.fileUrl,
@@ -80,6 +79,6 @@ export const resolvers = {
           color: true,
         },
       });
-    }    
-  },  
+    },
+  },
 };

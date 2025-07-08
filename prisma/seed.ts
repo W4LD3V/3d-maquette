@@ -2,14 +2,13 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-
-const user = await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
-        email: 'test@maquette.dev',
-        password: 'test1234',
+      email: 'test@maquette.dev',
+      password: 'test1234',
     },
-    });
-      
+  });
+
   const [pla, petg] = await Promise.all([
     prisma.plasticType.create({ data: { name: 'PLA' } }),
     prisma.plasticType.create({ data: { name: 'PETG' } }),

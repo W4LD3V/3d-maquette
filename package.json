@@ -8,7 +8,8 @@
     "prisma:seed": "ts-node prisma/seed.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",
@@ -26,7 +27,8 @@
     "prisma": "^6.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "swr": "^2.3.4"
+    "swr": "^2.3.4",
+    "urql": "^4.2.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -38,6 +40,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
+    "eslint-config-prettier": "^10.1.5",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"
