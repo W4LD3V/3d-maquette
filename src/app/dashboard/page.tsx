@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@/hooks/useUser';
 import { client } from '@/lib/graphql/client';
 import { gql } from 'graphql-tag';
 import LogoutButton from '@/components/LogoutButton';
@@ -41,6 +42,8 @@ export default function DashboardPage() {
   const [selectedColor, setSelectedColor] = useState('');
   const [colors, setColors] = useState<any[]>([]);
   const [submitMessage, setSubmitMessage] = useState('');
+  const { user, isLoading: loadingUser } = useUser();
+
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -154,6 +157,12 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4">
+      {loadingUser ? (
+        <p className="text-blue-500">Loading user...</p>
+      ) : user ? (
+        <p className="mb-4 text-blue-700 font-medium">Welcome, {user.email} 👋</p>
+      ) : null}
+
       <LogoutButton />
       <div className="bg-white border border-blue-100 p-6 rounded-xl shadow mb-10">
         <h2 className="text-xl font-semibold mb-4 text-blue-700">Submit New Print Request</h2>
