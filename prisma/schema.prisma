@@ -31,6 +31,7 @@ model PrintRequest {
   color         Color        @relation(fields: [colorId], references: [id])
   colorId       String
   createdAt     DateTime     @default(now())
+  isDeleted     Boolean      @default(false)
 }
 
 model PlasticType {

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
-import type { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
+import type { GraphQLContext } from './context';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret';
 
@@ -38,7 +38,7 @@ export const resolvers = {
       }));
     },
 
-    getColorsForPlastic: async (_: any, args: { plasticTypeId: string }) => {
+    getColorsForPlastic: async (_: unknown, args: { plasticTypeId: string }) => {
       return prisma.plasticColorAvailability.findMany({
         where: {
           plasticTypeId: args.plasticTypeId,
@@ -48,21 +48,35 @@ export const resolvers = {
         },
       });
     },
-    getPrintRequests: async () => {
-      return prisma.printRequest.findMany({
+
+    getPrintRequests: async (_: unknown, __: unknown, context: GraphQLContext) => {
+      const userId = getUserIdFromHeader(context.req);
+      if (!userId) throw new Error('Unauthorized');
+
+      const requests = await prisma.printRequest.findMany({
+        where: {
+          userId,
+          isDeleted: false,
+        },
         include: {
           plasticType: true,
           color: true,
         },
         orderBy: { createdAt: 'desc' },
       });
+
+      return requests.map((r) => ({
+        ...r,
+        createdAt: r.createdAt.toISOString(),
+      }));
     },
   },
+
   Mutation: {
     submitPrintRequest: async (
-      _: any,
+      _: unknown,
       args: { fileUrl: string; plasticTypeId: string; colorId: string },
-      context: { req: Request }
+      context: GraphQLContext
     ) => {
       const userId = getUserIdFromHeader(context.req);
       if (!userId) throw new Error('Unauthorized');
@@ -79,6 +93,26 @@ export const resolvers = {
           color: true,
         },
       });
+    },
+
+    deletePrintRequest: async (_: unknown, args: { id: string }, context: GraphQLContext) => {
+      const userId = getUserIdFromHeader(context.req);
+      if (!userId) throw new Error('Unauthorized');
+
+      const request = await prisma.printRequest.findUnique({
+        where: { id: args.id },
+      });
+
+      if (!request || request.userId !== userId) {
+        throw new Error('Not found or unauthorized');
+      }
+
+      await prisma.printRequest.update({
+        where: { id: args.id },
+        data: { isDeleted: true },
+      });
+
+      return true;
     },
   },
 };

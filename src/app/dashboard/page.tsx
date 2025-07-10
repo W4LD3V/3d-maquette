@@ -32,6 +32,12 @@ const SUBMIT_REQUEST = gql`
   }
 `;
 
+const DELETE_REQUEST = gql`
+  mutation DeletePrintRequest($id: ID!) {
+    deletePrintRequest(id: $id)
+  }
+`;
+
 export default function DashboardPage() {
   const router = useRouter();
   const [requests, setRequests] = useState<any[]>([]);
@@ -43,7 +49,6 @@ export default function DashboardPage() {
   const [colors, setColors] = useState<any[]>([]);
   const [submitMessage, setSubmitMessage] = useState('');
   const { user, isLoading: loadingUser } = useUser();
-
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -157,13 +162,16 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 px-4">
-      {loadingUser ? (
-        <p className="text-blue-500">Loading user...</p>
-      ) : user ? (
-        <p className="mb-4 text-blue-700 font-medium">Welcome, {user.email} 👋</p>
-      ) : null}
+      <div className="flex justify-between items-center">
+        {loadingUser ? (
+          <p className="text-blue-500">Loading user...</p>
+        ) : user ? (
+          <p className="mb-4 text-blue-700 font-medium">Welcome, {user.email} 👋</p>
+        ) : null}
 
-      <LogoutButton />
+        <LogoutButton />
+      </div>
+
       <div className="bg-white border border-blue-100 p-6 rounded-xl shadow mb-10">
         <h2 className="text-xl font-semibold mb-4 text-blue-700">Submit New Print Request</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -224,33 +232,60 @@ export default function DashboardPage() {
       {requests.length === 0 ? (
         <p className="text-center text-gray-500">No print requests yet.</p>
       ) : (
-        <ul className="space-y-4">
-          {requests.map((r) => (
-            <li key={r.id} className="bg-white p-4 rounded-xl shadow-md border border-blue-100">
-              <p>
-                <strong>File:</strong>{' '}
-                <a
-                  href={r.fileUrl}
-                  className="text-blue-600 underline"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  {r.fileUrl}
-                </a>
-              </p>
-              <p>
-                <strong>Plastic:</strong>{' '}
-                <span className="text-blue-700 font-semibold">{r.plasticType.name}</span>
-              </p>
-              <p>
-                <strong>Color:</strong> <span style={{ color: r.color.hex }}>{r.color.name}</span>
-              </p>
-              <p className="text-sm text-gray-500">
-                Submitted: {new Date(r.createdAt).toLocaleString()}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm border border-blue-500 bg-white rounded shadow">
+            <thead>
+              <tr className="text-blue-800 font-semibold">
+                <th className="border border-blue-500 px-4 py-2 text-left">File</th>
+                <th className="border border-blue-500 px-4 py-2 text-left">Plastic Type</th>
+                <th className="border border-blue-500 px-4 py-2 text-left">Color</th>
+                <th className="border border-blue-500 px-4 py-2 text-left">Submitted At</th>
+                <th className="border border-blue-500 px-4 py-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {requests.map((r) => (
+                <tr key={r.id} className="hover:bg-blue-50">
+                  <td className="border border-blue-500 px-4 py-2">
+                    <a
+                      href={r.fileUrl}
+                      className="text-blue-600 underline"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {r.fileUrl}
+                    </a>
+                  </td>
+                  <td className="border border-blue-500 px-4 py-2">{r.plasticType.name}</td>
+                  <td className="border border-blue-500 px-4 py-2" style={{ color: r.color.hex }}>
+                    {r.color.name}
+                  </td>
+                  <td className="border border-blue-500 px-4 py-2 text-gray-500">
+                    {new Date(r.createdAt.replace(' ', 'T')).toLocaleString()}
+                  </td>
+                  <td className="border border-blue-500 px-4 py-2">
+                    <button
+                      className="text-red-500 underline"
+                      onClick={async () => {
+                        const token = localStorage.getItem('token');
+                        await client
+                          .mutation(
+                            DELETE_REQUEST,
+                            { id: r.id },
+                            { fetchOptions: { headers: { Authorization: `Bearer ${token}` } } }
+                          )
+                          .toPromise();
+                        setRequests((prev) => prev.filter((req) => req.id !== r.id));
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

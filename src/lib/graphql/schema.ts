@@ -40,5 +40,6 @@ export const typeDefs = gql`
 
   type Mutation {
     submitPrintRequest(fileUrl: String!, plasticTypeId: String!, colorId: String!): PrintRequest!
+    deletePrintRequest(id: ID!): Boolean!
   }
 `;
