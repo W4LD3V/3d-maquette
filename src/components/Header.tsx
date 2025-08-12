@@ -1,11 +1,11 @@
 'use client';
-
 import { useUser } from '@/hooks/useUser';
 import LogoutButton from './LogoutButton';
 import Link from 'next/link';
 
 export default function Header() {
   const { user, isLoading } = useUser();
+  console.log('[Header] render. isLoading:', isLoading, 'user:', user);
 
   return (
     <header className="flex justify-between items-center container mx-auto px-4 py-8 ">
@@ -19,12 +19,15 @@ export default function Header() {
         <Link href="/history" className="text-blue-700 hover:underline">
           History
         </Link>
+
         {isLoading ? (
           <p className="text-blue-500">Loading user...</p>
         ) : user ? (
-          <span className="text-blue-700">{user.email}</span>
+          <>
+            <span className="text-blue-700">{user.email}</span>
+            <LogoutButton />
+          </>
         ) : null}
-        <LogoutButton />
       </nav>
     </header>
   );

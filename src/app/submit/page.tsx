@@ -87,6 +87,7 @@ export default function SubmitPage() {
       <h2 className="text-xl font-semibold text-blue-700 mb-4">Submit Print Request</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
+          data-testid="file-url"
           type="text"
           value={fileUrl}
           onChange={(e) => setFileUrl(e.target.value)}
@@ -95,6 +96,7 @@ export default function SubmitPage() {
           required
         />
         <select
+          data-testid="plastic-select"
           value={selectedPlastic}
           onChange={(e) => setSelectedPlastic(e.target.value)}
           className="w-full border p-2 rounded text-blue-700"
@@ -108,6 +110,7 @@ export default function SubmitPage() {
           ))}
         </select>
         <select
+          data-testid="color-select"
           value={selectedColor}
           onChange={(e) => setSelectedColor(e.target.value)}
           className="w-full border p-2 rounded text-blue-700"
@@ -122,6 +125,7 @@ export default function SubmitPage() {
           ))}
         </select>
         <button
+          data-testid="submit-btn"
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >

@@ -18,6 +18,7 @@ export default function AuthForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    console.log('[AuthForm] submitting', { email, password, isRegister });
 
     const endpoint = isRegister ? '/api/register' : '/api/login';
     try {
@@ -28,17 +29,27 @@ export default function AuthForm() {
       });
 
       const data = await res.json();
+      console.log('[AuthForm] response:', data);
+
       if (!res.ok) {
         setError(data.error || 'Something went wrong');
         return;
       }
 
       if (data.token) {
+        console.log('[AuthForm] saving token to localStorage:', data.token);
         localStorage.setItem('token', data.token);
+
+        // ⬇️ Option A: make useUser() react immediately in the same tab
+        window.dispatchEvent(new StorageEvent('storage', { key: 'token', newValue: data.token }));
+
+        // ⬇️ force client components (Header) to re-render with the new token
+        router.refresh();
       }
 
       router.push('/dashboard');
     } catch (err) {
+      console.error('[AuthForm] network error:', err);
       setError('Network error');
     }
   };
@@ -49,8 +60,9 @@ export default function AuthForm() {
         {isRegister ? 'Create an Account' : 'Login to Your Account'}
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" data-testid="auth-form">
         <input
+          data-testid="email"
           type="email"
           className="w-full p-3 text-blue-700 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Email"
@@ -59,6 +71,7 @@ export default function AuthForm() {
           required
         />
         <input
+          data-testid="password"
           type="password"
           className="w-full p-3 text-blue-700 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Password"
@@ -70,6 +83,7 @@ export default function AuthForm() {
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
         <button
+          data-testid="submit-auth"
           type="submit"
           className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
         >
@@ -79,6 +93,7 @@ export default function AuthForm() {
 
       <div className="mt-4 text-center">
         <button
+          data-testid="toggle-auth"
           type="button"
           onClick={toggleMode}
           className="text-sm text-blue-600 hover:underline"

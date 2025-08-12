@@ -73,7 +73,10 @@ export default function PrintHistoryPage() {
         <p className="text-gray-500 text-center">No print requests yet.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm border border-blue-700 bg-white rounded shadow ">
+          <table
+            data-testid="history-table"
+            className="min-w-full text-sm border border-blue-700 bg-white rounded shadow "
+          >
             <thead>
               <tr className="text-blue-700 font-semibold">
                 <th className="border border-blue-700 px-4 py-2 text-left">File</th>
@@ -96,7 +99,9 @@ export default function PrintHistoryPage() {
                       {r.fileUrl}
                     </a>
                   </td>
-                  <td className="border border-blue-700 text-blue-700 px-4 py-2">{r.plasticType.name}</td>
+                  <td className="border border-blue-700 text-blue-700 px-4 py-2">
+                    {r.plasticType.name}
+                  </td>
                   <td className="border border-blue-700 px-4 py-2" style={{ color: r.color.hex }}>
                     {r.color.name}
                   </td>
@@ -104,7 +109,11 @@ export default function PrintHistoryPage() {
                     {new Date(r.createdAt.replace(' ', 'T')).toLocaleString()}
                   </td>
                   <td className="border border-blue-700 px-4 py-2">
-                    <button onClick={() => handleDelete(r.id)} className="text-red-500 underline">
+                    <button
+                      data-testid={`delete-${r.id}`}
+                      onClick={() => handleDelete(r.id)}
+                      className="text-red-500 underline"
+                    >
                       Delete
                     </button>
                   </td>

@@ -35,9 +35,16 @@
     "@tailwindcss/postcss": "^4.1.11",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^20",
+    "@types/node": "^20.19.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@wdio/cli": "^9.19.1",
+    "@wdio/cucumber-framework": "^9.19.1",
+    "@wdio/devtools-service": "^8.42.0",
+    "@wdio/globals": "^9.17.0",
+    "@wdio/local-runner": "^9.19.1",
+    "@wdio/spec-reporter": "^9.19.1",
+    "@wdio/types": "^9.19.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.3.5",
@@ -46,6 +53,7 @@
     "prettier": "^3.6.2",
     "tailwindcss": "^4.1.11",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5.9.2",
+    "webdriverio": "^9.19.1"
   }
 }
